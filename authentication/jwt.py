@@ -1,7 +1,6 @@
 import jwt
 from chat_app.settings import SECRET_KEY
 
-
 def generate_token(payload):
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token

@@ -22,18 +22,21 @@ class Contact(models.Model):
         blank=True,
     )
 
+    # Method to add a user contact
     @classmethod
-    def add_user_contact(self, username, contact_username):
+    def add_user_contact(cls, username, contact_username):
         user = User.objects.get(username=username)
         user_contact = User.objects.get(username=contact_username)
         Contact.objects.get_or_create(user=user, user_contact=user_contact)
 
+    # Method to add a group contact
     @classmethod
-    def add_group_contact(self, username, group_name):
+    def add_group_contact(cls, username, group_name):
         user = User.objects.get(username=username)
         group_contact = Group.objects.get(name=group_name)
         Contact.objects.get_or_create(user=user, group_contact=group_contact)
 
+    # Method to get contacts for a user
     @classmethod
     def get_contacts(cls, username):
         user = User.objects.get(username=username)
@@ -41,11 +44,12 @@ class Contact(models.Model):
         return contacts
 
     class Meta:
-        # unique_together = ("user", "contact")
+        # Define unique constraints for the Contact model
         unique_together = (("user", "user_contact"), ("user", "group_contact"))
         app_label = "chat_app"
 
 
+# Define the Message model
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name="sender", on_delete=models.CASCADE)
     receiver_user = models.ForeignKey(
@@ -70,6 +74,7 @@ class Message(models.Model):
         app_label = "chat_app"
         ordering = ["timestamp"]
 
+    # Method to add a message
     @classmethod
     def add_message(cls, sender, receiver, message, is_direct_message=True):
         sender = User.objects.get(username=sender)
@@ -87,20 +92,20 @@ class Message(models.Model):
             is_direct_message=is_direct_message,
         )
 
+    # Method to get messages between two users
     @classmethod
     def get_user_messages(cls, party1, party2):
         # Get the users involved in the conversation
         user1 = User.objects.get(username=party1)
         user2 = User.objects.get(username=party2)
-
         # Query messages between the two parties, sorted by timestamp in ascending order
         messages = cls.objects.filter(
             (models.Q(sender=user1) & models.Q(receiver_user=user2))
             | (models.Q(sender=user2) & models.Q(receiver_user=user1))
         ).order_by("timestamp")
-
         return messages
 
+    # Method to get messages for a group
     @classmethod
     def get_group_messages(cls, group_name):
         group = Group.objects.get(name=group_name)

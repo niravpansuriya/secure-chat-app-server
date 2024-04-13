@@ -1,10 +1,11 @@
-# serializers.py
+# Import necessary modules
 from rest_framework import serializers
 from .models import Message, Contact
 from user.models import User
 from group.models import Group
 
 
+# Define MessageSerializer
 class MessageSerializer(serializers.ModelSerializer):
     sender = serializers.StringRelatedField(source="sender.username")
     receiver = serializers.StringRelatedField(source="receiver.username")
@@ -14,6 +15,7 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = ["sender", "receiver", "message", "is_direct_message", "timestamp"]
 
 
+# Define MixedContactField
 class MixedContactField(serializers.SerializerMethodField):
     def to_representation(self, value):
         if value.user_contact:
@@ -29,9 +31,9 @@ class MixedContactField(serializers.SerializerMethodField):
         return None
 
 
+# Define ContactSerializer
 class ContactSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(source="user.username")
-    # contact = serializers.StringRelatedField(source="contact.username")
     contact = MixedContactField(allow_null=True)
 
     class Meta:
